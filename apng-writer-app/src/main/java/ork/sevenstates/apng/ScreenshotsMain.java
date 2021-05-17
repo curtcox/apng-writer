@@ -2,6 +2,7 @@ package ork.sevenstates.apng;
 
 import ork.sevenstates.apng.filter.Filter;
 import ork.sevenstates.apng.filter.None;
+import ork.sevenstates.apng.optimizing.Identity;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -29,7 +30,7 @@ public final class ScreenshotsMain {
     private APNGSeqWriter newWriter() throws IOException {
         int bands = screenshot().getRaster().getNumBands();
         Filter filter = new None(screenSize.width,screenSize.height,bands);
-        return new APNGSeqWriter(fileName, filter);
+        return new APNGSeqWriter(fileName, filter, new Identity());
     }
 
     private void writeImage(APNGSeqWriter writer) throws IOException {

@@ -42,16 +42,4 @@ public abstract class AbstractFilter implements Filter {
 		}
 	}
 
-	public int leftPixel(ByteBuffer in, int srcOffset, int x) {
-		return x >= bpp ? in.get(srcOffset + x - bpp) & 0xff : 0;
-	}
-
-	public int abovePixel(ByteBuffer in, int srcOffset, int x) {
-		return srcOffset >= width * bpp ? in.get(srcOffset + x - width * bpp) & 0xff : 0;
-	}
-
-	public int aboveLeftPixel(ByteBuffer in, int srcOffset, int x) {
-		return srcOffset >= width * bpp && x >= bpp ? in.get(srcOffset + x - (width + 1) * bpp) & 0xff : 0;
-	}
-
 }
