@@ -4,34 +4,18 @@ import java.nio.ByteBuffer;
 
 public abstract class AbstractFilter implements Filter {
 
-	private int width;
-	private int height;
-	private int bpp;
+	final int width;
+	private final int height;
+	private final int bpp;
 
-	protected AbstractFilter() { }
+	public AbstractFilter(int width, int height, int bpp) {
+		this.width = width;
+		this.height = height;
+		this.bpp = bpp;
+	}
 
 	public int getBpp() {
 		return bpp;
-	}
-
-	public void setBpp(int newBpp) {
-		bpp = newBpp;
-	}
-
-	public int getHeight() {
-		return height;
-	}
-
-	public void setHeight(int newHeight) {
-		height = newHeight;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public void setWidth(int newWidth) {
-		this.width = newWidth;
 	}
 
 	public void close() {}

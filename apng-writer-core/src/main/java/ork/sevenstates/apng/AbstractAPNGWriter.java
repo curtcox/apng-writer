@@ -13,8 +13,6 @@ import java.nio.IntBuffer;
 import java.util.zip.CRC32;
 
 import ork.sevenstates.apng.filter.Filter;
-import ork.sevenstates.apng.filter.FilterFactory;
-import ork.sevenstates.apng.optimizing.Identity;
 import ork.sevenstates.apng.optimizing.Optimizer;
 
 public abstract class AbstractAPNGWriter
@@ -31,12 +29,8 @@ public abstract class AbstractAPNGWriter
 	int sequenceNumber;
 	boolean closed = false;
 
-	public AbstractAPNGWriter(int alg) {
-		this(alg, new Identity());
-	}
-	
-	public AbstractAPNGWriter(int alg, Optimizer optimizer) {
-		filter = FilterFactory.getFilter(alg);
+	public AbstractAPNGWriter(Filter filter, Optimizer optimizer) {
+		this.filter = filter;
 		this.optimizer = optimizer;
 	}
 
@@ -55,44 +49,10 @@ public abstract class AbstractAPNGWriter
 		writeImage(img, Tools.dimsFromImage(img), fpsNum, fpsDen);
 	}
 
-	public void writeImage(BufferedImage img, int fpsNum, int fpsDen) throws IOException {
-		ensureOpen();
-		if (img == null) {
-			throw new IOException("Image is null");
-		}
-
-		writeImage(img, Tools.dimsFromImage(img), fpsNum, fpsDen);
-	}
-
-	public void writeImage(BufferedImage img, int delay) throws IOException {
-		ensureOpen();
-		if (img == null) {
-			throw new IOException("Image is null");
-		}
-
-		writeImage(img, Tools.dimsFromImage(img), delay);
-	}
-
-	public void writeImage(Image img, Dimension size) throws IOException {
-		ensureOpen();
-		if (img == null) {
-			throw new IOException("Image is null");
-		}
-		writeImage(img, size, fpsNum, fpsDen);
-	}
-
-	public void writeImage(Image img, Dimension size, int delay) throws IOException {
-		ensureOpen();
-		if (img == null) {
-			throw new IOException("Image is null");
-		}
-		int gcd = gcd(1000, delay);
-		writeImage(img, size, delay/gcd, 1000/gcd);
-	}
-
 	public abstract void writeImage(Image img, Dimension size, int fpsNum, int fpsDen) throws IOException;
 
-	protected ByteBuffer makeIHDRChunk(Dimension d, byte numPlanes, byte bitsPerPlane) throws IOException { //http://www.w3.org/TR/PNG/#11IHDR
+	//http://www.w3.org/TR/PNG/#11IHDR
+	protected ByteBuffer makeIHDRChunk(Dimension d, byte numPlanes, byte bitsPerPlane) {
 		ByteBuffer bb = ByteBuffer.allocate(Consts.IHDR_TOTAL_LEN);
 		bb.putInt(Consts.IHDR_DATA_LEN);
 		bb.putInt(Consts.IHDR_SIG);
@@ -150,7 +110,7 @@ public abstract class AbstractAPNGWriter
 		return (int) crc.getValue();
 	}
 
-	protected ByteBuffer makeFCTL(Rectangle r, int fpsNum, int fpsDen, boolean succ) throws IOException {
+	protected ByteBuffer makeFCTL(Rectangle r, int fpsNum, int fpsDen, boolean succ) {
 		ByteBuffer bb = ByteBuffer.allocate(Consts.fcTL_TOTAL_LEN);
 
 		bb.putInt(Consts.fcTL_DATA_LEN);
@@ -243,9 +203,6 @@ public abstract class AbstractAPNGWriter
 		tmp.position(0);
 		tmp.limit(tmp.limit() - 1);
 		ByteBuffer result = ByteBuffer.allocate(length * numBands + dim.height);
-		filter.setHeight(dim.height);
-		filter.setWidth(dim.width);
-		filter.setBpp(numBands);
 
 		if (dim.width == 1 && dim.height == 1) {
 			result.put(Consts.ZERO);
@@ -261,6 +218,4 @@ public abstract class AbstractAPNGWriter
 		return result;
 	}
 
-	private static int gcd(int a, int b) { return b==0 ? a : gcd(b, a%b); }
-	
 }

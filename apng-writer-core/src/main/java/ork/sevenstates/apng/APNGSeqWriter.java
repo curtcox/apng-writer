@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Map;
 
+import ork.sevenstates.apng.filter.Filter;
 import ork.sevenstates.apng.optimizing.Identity;
 import ork.sevenstates.apng.optimizing.Optimizer;
 
@@ -17,17 +18,17 @@ public final class APNGSeqWriter extends AbstractAPNGWriter {
 	private final FileChannel out;
 	private long actlBlockOffset = 0;
 
-	public APNGSeqWriter(File f, int alg) throws FileNotFoundException {
-		this(f, alg, new Identity());
+	public APNGSeqWriter(File f, Filter filter) throws FileNotFoundException {
+		this(f, filter, new Identity());
 	}
 	
-	public APNGSeqWriter(String fName, int alg) throws FileNotFoundException {
-		this(new File(fName), alg);
-	}
+//	public APNGSeqWriter(String fName, Filter filter) throws FileNotFoundException {
+//		this(new File(fName), filter);
+//	}
 	
 	@SuppressWarnings("resource") //Channel will close stream
-	public APNGSeqWriter(File f, int alg, Optimizer optimizer) throws FileNotFoundException {
-		super(alg, optimizer);
+	public APNGSeqWriter(File f, Filter filter, Optimizer optimizer) throws FileNotFoundException {
+		super(filter, optimizer);
 		out = new RandomAccessFile(f, "rw").getChannel();
 	}
 

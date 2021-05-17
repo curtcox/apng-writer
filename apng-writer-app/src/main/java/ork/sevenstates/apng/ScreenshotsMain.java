@@ -1,5 +1,8 @@
 package ork.sevenstates.apng;
 
+import ork.sevenstates.apng.filter.Filter;
+import ork.sevenstates.apng.filter.None;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -9,20 +12,24 @@ public final class ScreenshotsMain {
 
     final File fileName;
     final Robot robot;
+    final Dimension screenSize;
 
-    ScreenshotsMain(File fileName,Robot robot) {
+    ScreenshotsMain(File fileName,Robot robot,Dimension screenSize) {
         this.fileName = fileName;
         this.robot = robot;
+        this.screenSize = screenSize;
     }
 
     public static void main(String[] args) throws Exception {
         File fileName = new File("screenshot.png");
 
-        new ScreenshotsMain(fileName,new Robot()).writeScreenshots();
+        new ScreenshotsMain(fileName,new Robot(),screenSize()).writeScreenshots();
     }
 
     private APNGSeqWriter newWriter() throws IOException {
-        return new APNGSeqWriter(fileName, 0);
+        int bands = screenshot().getRaster().getNumBands();
+        Filter filter = new None(screenSize.width,screenSize.height,bands);
+        return new APNGSeqWriter(fileName, filter);
     }
 
     private void writeImage(APNGSeqWriter writer) throws IOException {
@@ -30,7 +37,11 @@ public final class ScreenshotsMain {
     }
 
     private BufferedImage screenshot() {
-        return robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
+        return robot.createScreenCapture(new Rectangle(screenSize));
+    }
+
+    private static Dimension screenSize() {
+        return Toolkit.getDefaultToolkit().getScreenSize();
     }
 
     private void writeScreenshots() throws IOException {
