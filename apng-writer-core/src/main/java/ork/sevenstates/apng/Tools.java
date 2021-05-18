@@ -15,44 +15,37 @@ import java.util.Map;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
-public final class Tools {
+final class Tools {
 
-	public static BufferedImage paintImage(Image src, BufferedImage dst) {
-		Graphics2D g2d = dst.createGraphics();
-		g2d.drawImage(src, 0, 0, null);
-		g2d.dispose();
-		return dst;
-	}
-
-	public static Dimension dimsFromImage(BufferedImage bi) {
+	static Dimension dimsFromImage(BufferedImage bi) {
 		return new Dimension(bi.getWidth(), bi.getHeight());
 	}
 
-	public static Map.Entry<Rectangle, BufferedImage> formatResult(BufferedImage source, Dimension d) {
+	static Map.Entry<Rectangle, BufferedImage> formatResult(BufferedImage source, Dimension d) {
 		return new AbstractMap.SimpleImmutableEntry<>(new Rectangle(d), source);
 	}
 
-	public static Map.Entry<Rectangle, BufferedImage> formatResult(BufferedImage source, Rectangle r) {
-		return new AbstractMap.SimpleImmutableEntry<>(r, source);
-	}
-
-	public static ByteBuffer compress(ByteBuffer in, int level) {
-		int remaining = in.remaining();
-		Deflater deflater = new Deflater(remaining > 42 ? level : 0);
-
-		int size = remaining + 20;
-		ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
-		DeflaterOutputStream dos = new DeflaterOutputStream(baos, deflater, 0x2000, false);
-		WritableByteChannel wbc = Channels.newChannel(dos);
+	public static ByteBuffer compress(ByteBuffer in) {
 		try {
-			wbc.write(in);
-			dos.finish();
-			dos.flush();
-			dos.close();
+			return compress0(in);
 		} catch (IOException e) {
 			throw new IllegalStateException("Lolwut?!", e);
 		}
-
-		return ByteBuffer.wrap(baos.toByteArray());
 	}
+
+	private static ByteBuffer compress0(ByteBuffer in) throws IOException {
+		int remaining = in.remaining();
+		Deflater deflater = new Deflater(remaining > 42 ? 9 : 0);
+
+		int size = remaining + 20;
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream(size);
+		DeflaterOutputStream deflaterStream = new DeflaterOutputStream(bytes, deflater, 0x2000, false);
+		WritableByteChannel wbc = Channels.newChannel(deflaterStream);
+		wbc.write(in);
+		deflaterStream.finish();
+		deflaterStream.flush();
+		deflaterStream.close();
+		return ByteBuffer.wrap(bytes.toByteArray());
+	}
+
 }

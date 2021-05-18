@@ -43,7 +43,7 @@ public final class APNGSeqWriter
 
 		int fpsNum = 1;
 		int fpsDen = 10;
-		writeImage(img, Tools.dimsFromImage(img), fpsNum, fpsDen);
+		writeImage(img, fpsNum, fpsDen);
 	}
 
 	//http://www.w3.org/TR/PNG/#11IHDR
@@ -141,7 +141,7 @@ public final class APNGSeqWriter
 	}
 
 	private ByteBuffer makeDAT(int sig, ByteBuffer buffer) {
-		ByteBuffer compressed = Tools.compress(buffer, 9);
+		ByteBuffer compressed = Tools.compress(buffer);
 
 		boolean needSeqNum = sig == Consts.fdAT_SIG;
 
@@ -223,16 +223,13 @@ public final class APNGSeqWriter
 		return result;
 	}
 
-	private void writeImage(Image img, Dimension size, int fpsNum, int fpsDen) throws IOException {
+	private void writeImage(BufferedImage img, int fpsNum, int fpsDen) throws IOException {
 		ensureOpen();
 		if (img == null) {
 			throw new IOException("Image is null");
 		}
 
-		BufferedImage container = optimizer.createImage(size);
-		Tools.paintImage(img, container);
-
-		Map.Entry<Rectangle, BufferedImage> bi = optimizer.processImage(container);
+		Map.Entry<Rectangle, BufferedImage> bi = optimizer.processImage(img);
 
 		BufferedImage value = bi.getValue();
 		Rectangle key = bi.getKey();
