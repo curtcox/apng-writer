@@ -39,13 +39,13 @@ public final class APNGSeqWriter
 		out = new RandomAccessFile(f, "rw").getChannel();
 	}
 
-	protected void ensureOpen() throws IOException {
+	private void ensureOpen() throws IOException {
 		if (closed) {
 			throw new IOException("Stream closed");
 		}
 	}
 
-	public void writeImage(BufferedImage img) throws IOException {
+	void writeImage(BufferedImage img) throws IOException {
 		ensureOpen();
 		if (img == null) {
 			throw new IOException("Image is null");
@@ -55,7 +55,7 @@ public final class APNGSeqWriter
 	}
 
 	//http://www.w3.org/TR/PNG/#11IHDR
-	protected ByteBuffer makeIHDRChunk(Dimension d, byte numPlanes, byte bitsPerPlane) {
+	private ByteBuffer makeIHDRChunk(Dimension d, byte numPlanes, byte bitsPerPlane) {
 		ByteBuffer bb = ByteBuffer.allocate(Consts.IHDR_TOTAL_LEN);
 		bb.putInt(Consts.IHDR_DATA_LEN);
 		bb.putInt(Consts.IHDR_SIG);
@@ -99,12 +99,11 @@ public final class APNGSeqWriter
 
 		closed = true;
 		frameCount = 0;
-		filter.close();
 		out.truncate(point);
 		out.close();
 	}
 
-	protected ByteBuffer make_acTLChunk(int frameCount, int loopCount) {
+	private ByteBuffer make_acTLChunk(int frameCount, int loopCount) {
 		ByteBuffer bb = ByteBuffer.wrap(Consts.getacTLArr());
 		bb.position(8);
 		bb.putInt(frameCount);
@@ -114,16 +113,16 @@ public final class APNGSeqWriter
 		return bb;
 	}
 
-	protected int crc(byte[] buf) {
+	private int crc(byte[] buf) {
 		return crc(buf, 0, buf.length);
 	}
-	protected int crc(byte[] buf, int off, int len) {
+	private int crc(byte[] buf, int off, int len) {
 		CRC32 crc = new CRC32();
 		crc.update(buf, off, len);
 		return (int) crc.getValue();
 	}
 
-	protected ByteBuffer makeFCTL(Rectangle r, int fpsNum, int fpsDen, boolean succ) {
+	private ByteBuffer makeFCTL(Rectangle r, int fpsNum, int fpsDen, boolean succ) {
 		ByteBuffer bb = ByteBuffer.allocate(Consts.fcTL_TOTAL_LEN);
 
 		bb.putInt(Consts.fcTL_DATA_LEN);
@@ -148,7 +147,7 @@ public final class APNGSeqWriter
 		return bb;
 	}
 
-	protected ByteBuffer makeDAT(int sig, ByteBuffer buffer) throws IOException {
+	private ByteBuffer makeDAT(int sig, ByteBuffer buffer) throws IOException {
 		ByteBuffer compressed = Tools.compress(buffer, 9);
 
 		boolean needSeqNum = sig == Consts.fdAT_SIG;
@@ -173,7 +172,7 @@ public final class APNGSeqWriter
 		return bb;
 	}
 
-	protected void addChunkCRC(ByteBuffer chunkBuffer) {
+	private void addChunkCRC(ByteBuffer chunkBuffer) {
 		if (chunkBuffer.remaining() != 4)			//CRC32 size 4
 			throw new IllegalArgumentException();
 
@@ -188,7 +187,7 @@ public final class APNGSeqWriter
 		chunkBuffer.putInt(crc(bytes));
 	}
 
-	protected ByteBuffer getPixelBytes(BufferedImage image, Dimension dim) {
+	private ByteBuffer getPixelBytes(BufferedImage image, Dimension dim) {
 		WritableRaster raster = image.getRaster();
 		int numBands = raster.getNumBands();
 		Object dataElements = raster.getDataElements(0, 0, dim.width, dim.height, null);
@@ -231,7 +230,7 @@ public final class APNGSeqWriter
 		return result;
 	}
 
-	public void writeImage(Image img, Dimension size, int fpsNum, int fpsDen) throws IOException {
+	private void writeImage(Image img, Dimension size, int fpsNum, int fpsDen) throws IOException {
 		ensureOpen();
 		if (img == null) {
 			throw new IOException("Image is null");
@@ -259,7 +258,6 @@ public final class APNGSeqWriter
 			actlBlockOffset = out.position();
 			out.write(ByteBuffer.wrap(Consts.getacTLArr())); // empty here, filled later
 		}
-
 
 		out.write(makeFCTL(key, fpsNum, fpsDen, frameCount != 0));
 		out.write(makeDAT(frameCount == 0 ? Consts.IDAT_SIG : Consts.fdAT_SIG, buffer));
