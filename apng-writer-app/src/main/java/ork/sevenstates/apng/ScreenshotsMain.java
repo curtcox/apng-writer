@@ -1,8 +1,5 @@
 package ork.sevenstates.apng;
 
-import ork.sevenstates.apng.filter.Filter;
-import ork.sevenstates.apng.optimizing.Identity;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;

@@ -1,4 +1,4 @@
-package ork.sevenstates.apng.filter;
+package ork.sevenstates.apng;
 
 import java.nio.ByteBuffer;
 

@@ -1,39 +1,29 @@
 package ork.sevenstates.apng;
 
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.*;
 import java.lang.reflect.Array;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
+import java.nio.*;
 import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.zip.CRC32;
-
-import ork.sevenstates.apng.filter.Filter;
-import ork.sevenstates.apng.optimizing.Optimizer;
 
 public final class APNGSeqWriter
 		implements Closeable
 {
 
-	final private int fpsNum = 1;
-	final private int fpsDen = 10;
+	private final Filter filter;
+	private final Identity optimizer;
 
-	final Filter filter;
-	final Optimizer optimizer;
-
-	int frameCount = 0;
-	int sequenceNumber;
-	boolean closed = false;
+	private int frameCount = 0;
+	private int sequenceNumber;
+	private boolean closed = false;
 
 	private final FileChannel out;
 	private long actlBlockOffset = 0;
 
-	public APNGSeqWriter(File f, Filter filter, Optimizer optimizer) throws FileNotFoundException {
+	public APNGSeqWriter(File f, Filter filter, Identity optimizer) throws FileNotFoundException {
 		this.filter = filter;
 		this.optimizer = optimizer;
 		out = new RandomAccessFile(f, "rw").getChannel();
@@ -51,6 +41,8 @@ public final class APNGSeqWriter
 			throw new IOException("Image is null");
 		}
 
+		int fpsNum = 1;
+		int fpsDen = 10;
 		writeImage(img, Tools.dimsFromImage(img), fpsNum, fpsDen);
 	}
 
@@ -116,6 +108,7 @@ public final class APNGSeqWriter
 	private int crc(byte[] buf) {
 		return crc(buf, 0, buf.length);
 	}
+
 	private int crc(byte[] buf, int off, int len) {
 		CRC32 crc = new CRC32();
 		crc.update(buf, off, len);
@@ -147,7 +140,7 @@ public final class APNGSeqWriter
 		return bb;
 	}
 
-	private ByteBuffer makeDAT(int sig, ByteBuffer buffer) throws IOException {
+	private ByteBuffer makeDAT(int sig, ByteBuffer buffer) {
 		ByteBuffer compressed = Tools.compress(buffer, 9);
 
 		boolean needSeqNum = sig == Consts.fdAT_SIG;
@@ -240,7 +233,6 @@ public final class APNGSeqWriter
 		Tools.paintImage(img, container);
 
 		Map.Entry<Rectangle, BufferedImage> bi = optimizer.processImage(container);
-
 
 		BufferedImage value = bi.getValue();
 		Rectangle key = bi.getKey();
