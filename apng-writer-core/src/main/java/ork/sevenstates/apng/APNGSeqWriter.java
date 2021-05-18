@@ -238,17 +238,8 @@ public final class APNGSeqWriter
 		Rectangle key = bi.getKey();
 		ByteBuffer buffer = getPixelBytes(value, key.getSize());
 
-
-		byte numPlanes = (byte) value.getRaster().getNumBands();
-		byte bitsPerPlane = 8;
-
 		if (frameCount == 0) {
-			out.write(ByteBuffer.wrap(Consts.getPNGSIGArr()));
-
-			out.write(makeIHDRChunk(key.getSize(), numPlanes, bitsPerPlane));
-
-			actlBlockOffset = out.position();
-			out.write(ByteBuffer.wrap(Consts.getacTLArr())); // empty here, filled later
+			writeImageHeader(key,value);
 		}
 
 		out.write(makeFCTL(key, fpsNum, fpsDen, frameCount != 0));
@@ -256,5 +247,17 @@ public final class APNGSeqWriter
 		frameCount++;
 	}
 
+	private void writeImageHeader(Rectangle key, BufferedImage value) throws IOException {
+		out.write(ByteBuffer.wrap(Consts.getPNGSIGArr()));
+		byte bitsPerPlane = 8;
+		out.write(makeIHDRChunk(key.getSize(), numPlanes(value), bitsPerPlane));
+
+		actlBlockOffset = out.position();
+		out.write(ByteBuffer.wrap(Consts.getacTLArr())); // empty here, filled later
+	}
+
+	private byte numPlanes(BufferedImage value) {
+		return (byte) value.getRaster().getNumBands();
+	}
 
 }
