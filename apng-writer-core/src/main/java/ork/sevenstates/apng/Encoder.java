@@ -2,14 +2,14 @@ package ork.sevenstates.apng;
 
 import java.nio.ByteBuffer;
 
-final class Filter {
+final class Encoder {
 
 	private final int width;
 	private final int height;
 	private final int bpp;
 	private static final byte INDEX = 0;
 
-	public Filter(int width, int height, int bpp) {
+	public Encoder(int width, int height, int bpp) {
 		this.width = width;
 		this.height = height;
 		this.bpp = bpp;

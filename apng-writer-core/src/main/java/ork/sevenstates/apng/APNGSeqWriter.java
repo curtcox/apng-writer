@@ -3,7 +3,6 @@ package ork.sevenstates.apng;
 import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.nio.*;
 import java.nio.channels.FileChannel;
 import java.util.zip.CRC32;
@@ -12,7 +11,7 @@ public final class APNGSeqWriter
 		implements Closeable
 {
 
-	private final Filter filter;
+	private final Encoder filter;
 
 	private int frameCount = 0;
 	private int sequenceNumber;
@@ -21,7 +20,7 @@ public final class APNGSeqWriter
 	private final FileChannel out;
 	private long actlBlockOffset = 0;
 
-	public APNGSeqWriter(File f, Filter filter) throws FileNotFoundException {
+	public APNGSeqWriter(File f, Encoder filter) throws FileNotFoundException {
 		this.filter = filter;
 		out = new RandomAccessFile(f, "rw").getChannel();
 	}

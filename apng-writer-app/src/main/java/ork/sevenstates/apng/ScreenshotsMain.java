@@ -25,7 +25,7 @@ public final class ScreenshotsMain {
 
     private APNGSeqWriter newWriter() throws IOException {
         int bands = screenshot().getRaster().getNumBands();
-        Filter filter = new Filter(screenSize.width,screenSize.height,bands);
+        Encoder filter = new Encoder(screenSize.width,screenSize.height,bands);
         return new APNGSeqWriter(fileName, filter);
     }
 

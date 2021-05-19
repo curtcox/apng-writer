@@ -11,9 +11,9 @@ final class BufferedImageSerializer {
 
     private final BufferedImage image;
     private final Dimension dim;
-    private final Filter filter;
+    private final Encoder filter;
 
-    BufferedImageSerializer(BufferedImage image, Dimension dim,Filter filter) {
+    BufferedImageSerializer(BufferedImage image, Dimension dim, Encoder filter) {
         this.image = image;
         this.dim = dim;
         this.filter = filter;
@@ -21,14 +21,18 @@ final class BufferedImageSerializer {
 
     ByteBuffer getPixelBytes() {
         final WritableRaster raster = image.getRaster();
-        final int numBands = raster.getNumBands();
-        final int[] dataElements = (int[]) raster.getDataElements(0, 0, dim.width, dim.height, null);
-        final int length = Array.getLength(dataElements);
+        final int          numBands = raster.getNumBands();
+        final int[]    dataElements = (int[]) raster.getDataElements(0, 0, dim.width, dim.height, null);
+        final int            length = Array.getLength(dataElements);
+        ByteBuffer           buffer = writeToBuffer(dataElements,numBands,length);
+        return encoded(buffer,numBands,length);
+    }
 
-        ByteBuffer tmp = ByteBuffer.allocate(length * numBands + 1);
+    private ByteBuffer writeToBuffer(int[] dataElements, int numBands, int length) {
+        ByteBuffer out = ByteBuffer.allocate(length * numBands + 1);
 
         if (numBands == 4) {
-            IntBuffer intBuffer = tmp.asIntBuffer();
+            IntBuffer intBuffer = out.asIntBuffer();
             for (int i = 0; i < length; i++) {
                 final int e = dataElements[i];
                 final int a = (e & 0xff000000) >>> 24;
@@ -38,26 +42,20 @@ final class BufferedImageSerializer {
             int index = 0;
             for (int i = 0; i < length; i++) {
                 final int e = dataElements[i];
-                tmp.putInt(index, e << 8);
+                out.putInt(index, e << 8);
                 index += 3;
             }
         }
 
-        tmp.position(0);
-        tmp.limit(tmp.limit() - 1);
+        out.position(0);
+        out.limit(out.limit() - 1);
+        return out;
+    }
+
+    private ByteBuffer encoded(ByteBuffer tmp,int numBands,int length) {
         ByteBuffer result = ByteBuffer.allocate(length * numBands + dim.height);
-
-        if (dim.width == 1 && dim.height == 1) {
-            result.put(Consts.ZERO);
-            result.put(tmp);
-            result.flip();
-            return result;
-        }
-
         filter.encode(tmp, result);
-
         result.position(0);
-
         return result;
     }
 
