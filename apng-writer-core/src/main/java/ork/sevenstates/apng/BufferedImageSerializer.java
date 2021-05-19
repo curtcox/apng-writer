@@ -32,24 +32,31 @@ final class BufferedImageSerializer {
         ByteBuffer out = ByteBuffer.allocate(length * numBands + 1);
 
         if (numBands == 4) {
-            IntBuffer intBuffer = out.asIntBuffer();
-            for (int i = 0; i < length; i++) {
-                final int e = dataElements[i];
-                final int a = (e & 0xff000000) >>> 24;
-                intBuffer.put(e << 8 | a);
-            }
+            writeDataElements(dataElements,length,out.asIntBuffer());
         } else {
-            int index = 0;
-            for (int i = 0; i < length; i++) {
-                final int e = dataElements[i];
-                out.putInt(index, e << 8);
-                index += 3;
-            }
+            writeDataElements(dataElements,length,out);
         }
 
         out.position(0);
         out.limit(out.limit() - 1);
         return out;
+    }
+
+    private void writeDataElements(int[] dataElements, int length, IntBuffer intBuffer) {
+        for (int i = 0; i < length; i++) {
+            final int e = dataElements[i];
+            final int a = (e & 0xff000000) >>> 24;
+            intBuffer.put(e << 8 | a);
+        }
+    }
+
+    private void writeDataElements(int[] dataElements, int length,ByteBuffer out) {
+        int index = 0;
+        for (int i = 0; i < length; i++) {
+            final int e = dataElements[i];
+            out.putInt(index, e << 8);
+            index += 3;
+        }
     }
 
     private ByteBuffer encoded(ByteBuffer tmp,int numBands,int length) {
