@@ -4,24 +4,26 @@ import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import java.nio.*;
-import java.nio.channels.FileChannel;
+import java.nio.channels.ByteChannel;
 import java.util.zip.CRC32;
 
 public final class APNGSeqWriter
 		implements Closeable
 {
 
-	private final Encoder filter;
-
 	private int frameCount = 0;
 	private int sequenceNumber;
 	private boolean closed = false;
 
-	private final FileChannel out;
-	private long actlBlockOffset = 0;
+	private final Encoder filter;
+	private final int max;
+	private final ByteChannel out;
+	private static final int fpsNum = 1;
+	private static final int fpsDen = 10;
 
-	public APNGSeqWriter(File f, Encoder filter) throws FileNotFoundException {
+	public APNGSeqWriter(File f, Encoder filter, int max) throws FileNotFoundException {
 		this.filter = filter;
+		this.max = max;
 		out = new RandomAccessFile(f, "rw").getChannel();
 	}
 
@@ -33,12 +35,6 @@ public final class APNGSeqWriter
 
 	void writeImage(BufferedImage img) throws IOException {
 		ensureOpen();
-		if (img == null) {
-			throw new IOException("Image is null");
-		}
-
-		int fpsNum = 1;
-		int fpsDen = 10;
 		writeImage(img, fpsNum, fpsDen);
 	}
 
@@ -76,32 +72,6 @@ public final class APNGSeqWriter
 				break;
 		}
 		return type;
-	}
-
-	public void close() throws IOException {
-		//IEND
-		out.write(ByteBuffer.wrap(Consts.getIENDArr()));
-
-		long point = out.position();
-
-		//frame count
-		out.position(actlBlockOffset);
-		out.write(make_acTLChunk(frameCount, 0));
-
-		closed = true;
-		frameCount = 0;
-		out.truncate(point);
-		out.close();
-	}
-
-	private ByteBuffer make_acTLChunk(int frameCount, int loopCount) {
-		ByteBuffer bb = ByteBuffer.wrap(Consts.getacTLArr());
-		bb.position(8);
-		bb.putInt(frameCount);
-		bb.putInt(loopCount);
-		addChunkCRC(bb);
-		bb.flip();
-		return bb;
 	}
 
 	private int crc(byte[] buf) {
@@ -206,8 +176,26 @@ public final class APNGSeqWriter
 		byte bitsPerPlane = 8;
 		out.write(makeIHDRChunk(key.getSize(), numPlanes(value), bitsPerPlane));
 
-		actlBlockOffset = out.position();
-		out.write(ByteBuffer.wrap(Consts.getacTLArr())); // empty here, filled later
+		out.write(make_acTLChunk(max, 0));
+	}
+
+	public void close() throws IOException {
+		//IEND
+		out.write(ByteBuffer.wrap(Consts.getIENDArr()));
+
+		closed = true;
+		frameCount = 0;
+		out.close();
+	}
+
+	private ByteBuffer make_acTLChunk(int frameCount, int loopCount) {
+		ByteBuffer bb = ByteBuffer.wrap(Consts.getacTLArr());
+		bb.position(8);
+		bb.putInt(frameCount);
+		bb.putInt(loopCount);
+		addChunkCRC(bb);
+		bb.flip();
+		return bb;
 	}
 
 	private byte numPlanes(BufferedImage value) {

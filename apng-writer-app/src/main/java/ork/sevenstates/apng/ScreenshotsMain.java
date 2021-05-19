@@ -23,10 +23,10 @@ public final class ScreenshotsMain {
         new ScreenshotsMain(fileName,new Robot(),screenSize()).writeScreenshots();
     }
 
-    private APNGSeqWriter newWriter() throws IOException {
+    private APNGSeqWriter newWriter(int count) throws IOException {
         int bands = screenshot().getRaster().getNumBands();
-        Encoder filter = new Encoder(screenSize.width,screenSize.height,bands);
-        return new APNGSeqWriter(fileName, filter);
+        Encoder encoder = new Encoder(screenSize.width,screenSize.height,bands);
+        return new APNGSeqWriter(fileName, encoder, count);
     }
 
     private void writeImage(APNGSeqWriter writer) throws IOException {
@@ -42,8 +42,9 @@ public final class ScreenshotsMain {
     }
 
     private void writeScreenshots() throws IOException {
-        APNGSeqWriter writer = newWriter();
-        for (int i = 0; i < 100; i++) {
+        int max = 10;
+        APNGSeqWriter writer = newWriter(max);
+        for (int i = 0; i < max; i++) {
             writeImage(writer);
             System.out.println(i);
             sleep();
@@ -53,7 +54,7 @@ public final class ScreenshotsMain {
 
     private void sleep() {
         try {
-            Thread.sleep(100);
+            Thread.sleep(10);
         } catch (InterruptedException e) {
             System.out.println("???");
         }

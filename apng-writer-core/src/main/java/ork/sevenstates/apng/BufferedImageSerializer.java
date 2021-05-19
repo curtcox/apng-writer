@@ -9,23 +9,27 @@ import java.nio.IntBuffer;
 
 final class BufferedImageSerializer {
 
-    private final BufferedImage image;
     private final Dimension dim;
     private final Encoder filter;
+    private final WritableRaster raster;
+    private final int numBands;
 
     BufferedImageSerializer(BufferedImage image, Dimension dim, Encoder filter) {
-        this.image = image;
-        this.dim = dim;
+        this.dim    = dim;
         this.filter = filter;
+        raster      = image.getRaster();
+        numBands    = raster.getNumBands();
     }
 
     ByteBuffer getPixelBytes() {
-        final WritableRaster raster = image.getRaster();
-        final int          numBands = raster.getNumBands();
-        final int[]    dataElements = (int[]) raster.getDataElements(0, 0, dim.width, dim.height, null);
-        final int            length = Array.getLength(dataElements);
-        ByteBuffer           buffer = writeToBuffer(dataElements,numBands,length);
+        final int[] dataElements = dataElements(raster);
+        final int         length = Array.getLength(dataElements);
+        ByteBuffer        buffer = writeToBuffer(dataElements,numBands,length);
         return encoded(buffer,numBands,length);
+    }
+
+    int[] dataElements(WritableRaster raster) {
+        return (int[]) raster.getDataElements(0, 0, dim.width, dim.height, null);
     }
 
     private ByteBuffer writeToBuffer(int[] dataElements, int numBands, int length) {
