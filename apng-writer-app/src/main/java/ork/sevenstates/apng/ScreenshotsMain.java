@@ -26,7 +26,7 @@ public final class ScreenshotsMain {
     private APNGSeqWriter newWriter() throws IOException {
         int bands = screenshot().getRaster().getNumBands();
         Filter filter = new Filter(screenSize.width,screenSize.height,bands);
-        return new APNGSeqWriter(fileName, filter, new Identity());
+        return new APNGSeqWriter(fileName, filter);
     }
 
     private void writeImage(APNGSeqWriter writer) throws IOException {
@@ -43,7 +43,7 @@ public final class ScreenshotsMain {
 
     private void writeScreenshots() throws IOException {
         APNGSeqWriter writer = newWriter();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             writeImage(writer);
             System.out.println(i);
             sleep();

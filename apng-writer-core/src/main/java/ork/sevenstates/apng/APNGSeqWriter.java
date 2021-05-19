@@ -6,7 +6,6 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.*;
 import java.nio.channels.FileChannel;
-import java.util.Map;
 import java.util.zip.CRC32;
 
 public final class APNGSeqWriter
@@ -14,7 +13,6 @@ public final class APNGSeqWriter
 {
 
 	private final Filter filter;
-	private final Identity optimizer;
 
 	private int frameCount = 0;
 	private int sequenceNumber;
@@ -23,9 +21,8 @@ public final class APNGSeqWriter
 	private final FileChannel out;
 	private long actlBlockOffset = 0;
 
-	public APNGSeqWriter(File f, Filter filter, Identity optimizer) throws FileNotFoundException {
+	public APNGSeqWriter(File f, Filter filter) throws FileNotFoundException {
 		this.filter = filter;
-		this.optimizer = optimizer;
 		out = new RandomAccessFile(f, "rw").getChannel();
 	}
 
@@ -225,18 +222,12 @@ public final class APNGSeqWriter
 
 	private void writeImage(BufferedImage img, int fpsNum, int fpsDen) throws IOException {
 		ensureOpen();
-		if (img == null) {
-			throw new IOException("Image is null");
-		}
-
-		Map.Entry<Rectangle, BufferedImage> bi = optimizer.processImage(img);
-
-		BufferedImage value = bi.getValue();
-		Rectangle key = bi.getKey();
-		ByteBuffer buffer = getPixelBytes(value, key.getSize());
+		Dimension dim = Tools.dimsFromImage(img);
+		Rectangle key = new Rectangle(dim);
+		ByteBuffer buffer = getPixelBytes(img, dim);
 
 		if (frameCount == 0) {
-			writeImageHeader(key,value);
+			writeImageHeader(key,img);
 		}
 
 		out.write(makeFCTL(key, fpsNum, fpsDen, frameCount != 0));

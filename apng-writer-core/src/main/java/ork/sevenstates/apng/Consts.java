@@ -1,7 +1,6 @@
 package ork.sevenstates.apng;
 
-
-public final class Consts {
+final class Consts {
 	public static final byte ZERO = 0;
 	
 	public static final int IHDR_SIG = 0x49484452;
@@ -21,8 +20,9 @@ public final class Consts {
 	
 	public static final int fcTL_DATA_LEN = 26;
 	public static final int fcTL_TOTAL_LEN = fcTL_DATA_LEN + CHUNK_DELTA;
-	
-	private static final byte[] PNG_SIG = new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}; //http://www.w3.org/TR/PNG/#5PNG-file-signature
+
+	//http://www.w3.org/TR/PNG/#5PNG-file-signature
+	private static final byte[] PNG_SIG = new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
 	private static final byte[] IEND_ARR = new byte[] {
 		0,	  0,   0,   0,
 		'I', 'E', 'N', 'D',

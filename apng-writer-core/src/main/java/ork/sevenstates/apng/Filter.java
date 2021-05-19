@@ -2,7 +2,7 @@ package ork.sevenstates.apng;
 
 import java.nio.ByteBuffer;
 
-public final class Filter {
+final class Filter {
 
 	private final int width;
 	private final int height;
@@ -20,11 +20,11 @@ public final class Filter {
 		int byteRowLen = width * bpp;
 		for (int y = 0; y < height; y++) {
 			int yoffset = y * byteRowLen;
-			encodeRow(in, yoffset, out, byteRowLen, yoffset + y);
+			encodeRow(in, yoffset, out, yoffset + y);
 		}
 	}
 
-	private void encodeRow(ByteBuffer in, int srcOffset, ByteBuffer out, int len, int destOffset) {
+	private void encodeRow(ByteBuffer in, int srcOffset, ByteBuffer out,int destOffset) {
 		out.put(destOffset++, INDEX);
 		int bpl = width * bpp;
 		ByteBuffer tmp = in.duplicate();
