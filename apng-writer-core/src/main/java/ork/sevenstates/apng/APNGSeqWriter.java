@@ -181,7 +181,7 @@ public final class APNGSeqWriter
 	}
 
 	private ByteBuffer getPixelBytes(BufferedImage image, Dimension dim) {
-		return new BufferedImageSerializer(filter).getPixelBytes(image,dim);
+		return new BufferedImageSerializer(image,dim,filter).getPixelBytes();
 	}
 
 	static Dimension dimsFromImage(BufferedImage bi) {
