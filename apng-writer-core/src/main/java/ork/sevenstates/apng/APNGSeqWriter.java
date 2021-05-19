@@ -138,7 +138,7 @@ public final class APNGSeqWriter
 	}
 
 	private ByteBuffer makeDAT(int sig, ByteBuffer buffer) {
-		ByteBuffer compressed = Tools.compress(buffer);
+		ByteBuffer compressed = ByteBufferCompressor.compress(buffer);
 
 		boolean needSeqNum = sig == Consts.fdAT_SIG;
 
@@ -220,9 +220,13 @@ public final class APNGSeqWriter
 		return result;
 	}
 
+	static Dimension dimsFromImage(BufferedImage bi) {
+		return new Dimension(bi.getWidth(), bi.getHeight());
+	}
+
 	private void writeImage(BufferedImage img, int fpsNum, int fpsDen) throws IOException {
 		ensureOpen();
-		Dimension dim = Tools.dimsFromImage(img);
+		Dimension dim = dimsFromImage(img);
 		Rectangle key = new Rectangle(dim);
 		ByteBuffer buffer = getPixelBytes(img, dim);
 

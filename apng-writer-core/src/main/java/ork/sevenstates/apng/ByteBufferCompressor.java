@@ -1,7 +1,5 @@
 package ork.sevenstates.apng;
 
-import java.awt.Dimension;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -10,11 +8,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
-final class Tools {
-
-	static Dimension dimsFromImage(BufferedImage bi) {
-		return new Dimension(bi.getWidth(), bi.getHeight());
-	}
+final class ByteBufferCompressor {
 
 	static ByteBuffer compress(ByteBuffer in) {
 		try {
